@@ -1,0 +1,31 @@
+version: '2.3'
+
+services:
+  envoy:
+    build:
+      context: .
+      dockerfile: envoy.Dockerfile
+    links:
+      - httpbin
+      - controlplane
+    working_dir: /srv
+    ports:
+      - 9901:9901
+      - 80:8080
+    expose:
+      - 9901
+      - 80
+    environment:
+      ENVOY_UID: '0'
+
+  httpbin:
+    image: kennethreitz/httpbin
+
+  controlplane:
+    build:
+      context: .
+      dockerfile: controlplane.Dockerfile
+    ports:
+      - 8000:8000
+    expose:
+      - 8000
