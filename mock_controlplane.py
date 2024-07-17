@@ -1,4 +1,5 @@
 import json
+import random
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
@@ -10,6 +11,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         if self.path == "/v3/discovery:extension_configs":
+            version = str(random.randint(1, 1000))
             response = {
                 "resources": [
                     [
@@ -20,7 +22,15 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                                 "@type": "type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager",
                                 "stat_prefix": "ecds",
                                 "codec_type": "AUTO",
-                                "http_filters": [{"name": "envoy.router"}],
+                                "server_name": f"Server({version})",
+                                "http_filters": [
+                                    {
+                                        "name": "envoy.router",
+                                        "typed_config": {
+                                            "@type": "type.googleapis.com/envoy.extensions.filters.http.router.v3.Router"
+                                        },
+                                    }
+                                ],
                                 "route_config": {
                                     "name": "example",
                                     "virtual_hosts": [
@@ -41,7 +51,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                         }
                     ]
                 ],
-                "version_info": "123",
+                "version_info": version,
             }
             self._set_response()
             self.wfile.write(json.dumps(response).encode("utf-8"))

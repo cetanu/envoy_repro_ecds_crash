@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: envoy.Dockerfile
-    links:
+    depends_on:
       - httpbin
       - controlplane
     working_dir: /srv
@@ -17,6 +17,7 @@ services:
       - 80
     environment:
       ENVOY_UID: '0'
+      ENVOY_LOGLEVEL: debug
 
   httpbin:
     image: kennethreitz/httpbin
@@ -29,3 +30,5 @@ services:
       - 8000:8000
     expose:
       - 8000
+    healthcheck:
+      test: nc -zv localhost 8000
